@@ -3,8 +3,8 @@ import sounddevice as sd
 from scipy.io import wavfile
 fs = 44100
 
-def play(wave, duration):
-    sd.play(wave, fs)
+def play(tone, duration):
+    sd.play(tone, fs)
     sd.wait()
 
 def sine_wave(freq, duration):
@@ -23,6 +23,7 @@ def sawtooth_wave(freq, duration):
     return note
 
 def save_wave(filename, data, samplerate):
+    data = np.int16((data / data.max()) * 32767)
     wavfile.write(filename, samplerate, data)
 
 frequency = 261.63 

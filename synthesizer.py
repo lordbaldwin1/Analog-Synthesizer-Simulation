@@ -1,6 +1,6 @@
 import numpy as np
 import sounddevice as sd
-
+import scipy.io import wavfile
 fs = 44100
 
 def play_tone(tone, duration):

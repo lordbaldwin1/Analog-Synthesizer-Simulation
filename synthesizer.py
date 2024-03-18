@@ -135,6 +135,10 @@ def gen_wave(form, freq, duration, lfo_rate, lfo_depth, wave=None):
             wave_triangle = 2 * np.abs(2 * (t * modulated_freq - np.floor(1/2 + t * modulated_freq))) - 1
             return wave_triangle
 
+# This function takes in the adsr list and a numpy array
+# and calculates the asdr length and curve and then
+# applies them to the wave, returning the original
+# waveform with the adsr envelope applied
 def envelope(adsr, wave):
     attack, decay, sustain, release = adsr
 
@@ -156,27 +160,39 @@ def envelope(adsr, wave):
 
     return enveloped_wave
 
+# This function is a simple order 5 lowpass filter
 def lowpass(cutoff, sample_rate, order=5):
     x = 0.5 * sample_rate
 
-    normalized_cutoff = cutoff / x
+    cutoff2 = cutoff / x
 
-    b, a = butter(order, normalized_cutoff, btype='low', analog=False)
+    b, a = butter(order, cutoff2, btype='low', analog=False)
 
     return b, a
 
-def lp_filter(data, cutoff_freq, sample_rate, order=5):
+# This function applies the lowpass filter to the passed in
+# wave and returns it
+def lp_filter(wave, cutoff_freq, sample_rate, order=5):
     b, a = lowpass(cutoff_freq, sample_rate, order=order)
 
-    filtered_data = lfilter(b, a, data)
+    filtered_wave = lfilter(b, a, wave)
 
-    return filtered_data
+    return filtered_wave
 
+# This function is a basic saturator using the hyperbolic
+# tangent to limit amplitude, the level adjusts the steepness
+# of the tanh curve.
+# This idea was retrieved from here:
+# https://www.reddit.com/r/DSP/comments/w7aad3/comment/ihincol/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
 def apply_saturation(wave, level):
     saturated_wave = np.tanh(level * wave)
 
     return saturated_wave
 
+# This function takes values from the GUI, generates
+# waves, if a wave file is loaded, it takes that, else
+# it generates a wave. Then it envelopes, filters, and saturates
+# the wave. Lastly, it displays the waveform on the GUI.
 def play_sound():
     global loaded_wave, loaded_wave_sample_rate
 
@@ -235,12 +251,15 @@ def play_sound():
 
     canvas.draw()
 
+# This function resets the loaded wave file data
 def unload_wave():
     global loaded_wave, loaded_wave_sample_rate
 
     loaded_wave = None
     loaded_wave_sample_rate = None
 
+# This function opens and reads wave file data
+# information to be played.
 def load_wave():
     global loaded_wave, loaded_wave_sample_rate
 
@@ -253,6 +272,8 @@ def load_wave():
 
         loaded_wave = np.interp(data, (data.min(), data.max()), (-1, 1))
 
+# Resets all of the settings on the GUI.
+# Reset button calls this.
 def default_settings():
     fre_scale.set(440)
     dur_scale.set(2)
@@ -271,6 +292,9 @@ def default_settings():
 
     waveform_var.set(0)
 
+# This function ensures that all processes are
+# terminated before the window is closed.
+# I was randomly getting errors when closing the application.
 def on_close():
     global measure_flag
 
@@ -281,17 +305,22 @@ def on_close():
 
     root.destroy()
 
+# This code initializes the window for the Tkinter GUI
+# and sets up some colors and titles.
 root = tk.Tk()
 root.title("basic synth")
 dark_grey = '#2a2a2a'
 root.configure(bg=dark_grey)
 
+# These frames are basically containers for GUI buttons.
 left_frame = Frame(root, bg=dark_grey)
 left_frame.pack(side=tk.LEFT, padx=10, pady=10)
 
 right_frame = Frame(root, bg=dark_grey)
 right_frame.pack(side=tk.RIGHT, padx=10, pady=10)
 
+# This waveform variable is used to keep track of
+# which waveform radio button is selected.
 waveform_var = IntVar()
 waveform_var.set(0)
 waveforms = ['Sine Wave', 
@@ -300,10 +329,15 @@ waveforms = ['Sine Wave',
              'Sawtooth Wave', 
              'Combined Wave']
 
+# Creates radio button for waveforms
 for i, waveform in enumerate(waveforms):
     radiobutton = Radiobutton(left_frame, text=waveform, variable=waveform_var, value=i, bg=dark_grey, fg='white', selectcolor=dark_grey, activebackground=dark_grey, activeforeground='green')
     radiobutton.pack(anchor=tk.W)
 
+# These scales are the sliders for frequency, duration, LFO rate/depth
+# ADSR, cutoff, and saturation.
+
+#Frequency/Duration
 fre_scale = Scale(left_frame, from_=100, to=2000, orient=HORIZONTAL, label="Frequency (Hz)", bg='#424242', fg='white', troughcolor='gray')
 fre_scale.set(440)
 fre_scale.pack(fill=tk.X)
@@ -312,6 +346,7 @@ dur_scale = Scale(left_frame, from_=1, to=5, orient=HORIZONTAL, label="Duration 
 dur_scale.set(2)
 dur_scale.pack(fill=tk.X)
 
+# LFO Rate/Depth
 lfor_scale = Scale(left_frame, from_=0, to=10, resolution=0.1, orient=HORIZONTAL, label="LFO Rate (Hz)", bg='#424242', fg='white', troughcolor='gray')
 lfor_scale.set(0)
 lfor_scale.pack(fill=tk.X)
@@ -320,6 +355,7 @@ lfod_scale = Scale(left_frame, from_=0, to=100, orient=HORIZONTAL, label="LFO De
 lfod_scale.set(0)
 lfod_scale.pack(fill=tk.X)
 
+# ADSR: attack, decay, sustain, release
 att_scale = Scale(right_frame, from_=0, to=100, orient=HORIZONTAL, label="Attack (%)", bg='#424242', fg='white', troughcolor='gray')
 att_scale.set(10)
 att_scale.pack(fill=tk.X)
@@ -336,34 +372,41 @@ rel_scale = Scale(right_frame, from_=0, to=100, orient=HORIZONTAL, label="Releas
 rel_scale.set(10)
 rel_scale.pack(fill=tk.X)
 
+# Cutoff
 cut_scale = Scale(right_frame, from_=100, to=5000, orient=HORIZONTAL, label="Cutoff Frequency (Hz)", bg='#424242', fg='white', troughcolor='gray')
 cut_scale.set(2500)
 cut_scale.pack(fill=tk.X)
 
+# Saturation
 sat_scale = Scale(right_frame, from_=0, to=3, resolution=0.1, orient=HORIZONTAL, label="Saturation Level", bg='#424242', fg='white', troughcolor='gray')
 sat_scale.set(1.5)
 sat_scale.pack(fill=tk.X)
 
+# Loading/unloading wave files
 load_button = Button(left_frame, text="Load WAV", command=load_wave, bg='#424242', fg='white')
 load_button.pack()
 
 unload_button = Button(left_frame, text="Unload WAV", command=unload_wave, bg='#424242', fg='white')
 unload_button.pack()
 
+# Play button
 play_button = Button(left_frame, text="Play Wave", command=play_sound, bg='#424242', fg='white')
 play_button.pack()
 
+# Revert settings to default
 revert_button = Button(left_frame, text="Revert to Defaults", command=default_settings, bg='#424242', fg='white')
 revert_button.pack()
 
+# Start measure of notes
 startm_button = Button(left_frame, text="Play Measure", command=start_measure, bg='#424242', fg='white')
 startm_button.pack()
 
+# Stop measure of notes
 stopm_button = Button(left_frame, text="Stop measure", command=stop_measure, bg='#424242', fg='white')
 stopm_button.pack()
 
+# Figure for the visualization of the generated waveforms
 fig = Figure(figsize=(5, 3), facecolor='#424242')
-
 ax = fig.add_subplot(111)
 ax.set_facecolor('#424242')
 ax.tick_params(axis='x', colors='white')
@@ -375,6 +418,7 @@ canvas = FigureCanvasTkAgg(fig, master=right_frame)
 canvas_widget = canvas.get_tk_widget()
 canvas_widget.pack()
 
+# Wraps up processes before program stops
 root.protocol("WM_DELETE_WINDOW", on_close)
 
 root.mainloop()

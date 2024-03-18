@@ -20,7 +20,6 @@ keyboard_mapping = {
     'h': 440.00,  # A4
     'u': 466.16,  # A#4/Bb4
     'j': 493.88,  # B4
-    # Add more keys and notes as needed
 }
 
 def play(tone, duration):

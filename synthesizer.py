@@ -9,6 +9,8 @@
 # a short sequence of notes (which I wish I had implemented my Aleatoric code).
 # For all of these things except the short measure of notes, the waveform produced
 # is displayed on the GUI.
+
+# Imported Libraries
 import numpy as np
 import sounddevice as sd
 from scipy.signal import butter, lfilter
@@ -22,12 +24,12 @@ from matplotlib import style
 import threading
 import time
 
+# Global Variables
 sample_rate = 44100
 loaded_wave = None
 loaded_wave_sample_rate = None
 measure_flag = False
 measure_thread = None
-
 measure_notes = [440, 494, 523, 587, 659, 698, 784]
 measure_durations = [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4]
 note_interval = 0.5

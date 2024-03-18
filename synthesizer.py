@@ -1,3 +1,14 @@
+# Zachary Springer
+# 3/18/2024
+# CS410P Music, Sound, & Computers
+# This program is a basic synthesizer which allows you to do a couple of things
+# First, you can generate and play sine, square, sawtooth, and triangle waves.
+# You can also combine these waves and play them. You have several options to
+# adjust the sound of these waves through sliders on the GUI. You can also
+# load a wave file to play it through the synthesizer. You can also play
+# a short sequence of notes (which I wish I had implemented my Aleatoric code).
+# For all of these things except the short measure of notes, the waveform produced
+# is displayed on the GUI.
 import numpy as np
 import sounddevice as sd
 <<<<<<< HEAD
@@ -49,6 +60,7 @@ measure_durations = [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4]
 >>>>>>> 44bc7b0 (fixed formatting)
 note_interval = 0.5
 
+# This function plays notes from measure_notes
 def measure():
     global measure_flag
 
@@ -59,6 +71,11 @@ def measure():
             synth_tone(note, duration)
             time.sleep(note_interval)
 
+# This function grabs settings from the sliders in the GUI
+# if combined wave is chose, it generates and sums the waves
+# else, it selects the chosen wave and generates it.
+# Then, it is passed through the ADSR envelope, lowpass filter,
+# and saturation and played.
 def synth_tone(freq, duration):
     if not measure_flag:
         return
@@ -95,6 +112,8 @@ def synth_tone(freq, duration):
     sd.play(saturated_wave, sample_rate)
     sd.wait()
 
+# This function turns on the measure flag and creates a thread
+# which will execute the measure() function
 def start_measure():
     global measure_flag, measure_thread
 
@@ -103,6 +122,8 @@ def start_measure():
         measure_thread = threading.Thread(target=measure)
         measure_thread.start()
 
+# This function turns off the measure flag and
+# makes sure the threads finished execution
 def stop_measure():
     global measure_flag
 
@@ -111,14 +132,16 @@ def stop_measure():
     if measure_thread:
         measure_thread.join()
 
+# This function generates the four waves
+# and returns them as a numpy array
 def gen_wave(form, freq, duration, lfo_rate, lfo_depth, wave=None):
     duration_int = int(sample_rate * duration)
 
     t = np.linspace(0, duration, duration_int, False)
 
-    two_pi = 2 * np.pi
+    pi_2 = 2 * np.pi
 
-    lfo_frequency = two_pi * lfo_rate
+    lfo_frequency = pi_2 * lfo_rate
     lfo = np.sin(lfo_frequency * t) * lfo_depth * freq
 
     modulated_freq = freq + lfo
@@ -128,10 +151,10 @@ def gen_wave(form, freq, duration, lfo_rate, lfo_depth, wave=None):
         return wave_product
     else:
         if form == 'sine':
-            wave_sine = np.sin(two_pi * modulated_freq * t)
+            wave_sine = np.sin(pi_2 * modulated_freq * t)
             return wave_sine
         elif form == 'square':
-            wave_square = np.sign(np.sin(two_pi * modulated_freq * t))
+            wave_square = np.sign(np.sin(pi_2 * modulated_freq * t))
             return wave_square
         elif form == 'sawtooth':
             wave_sawtooth = 2 * (t * modulated_freq - np.floor(1/2 + t * modulated_freq))

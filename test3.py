@@ -1,15 +1,5 @@
 import numpy as np
 import sounddevice as sd
-<<<<<<< HEAD
-from scipy.io import wavfile
-fs = 44100
-
-def play(tone, duration):
-    sd.play(tone, fs)
-    sd.wait()
-
-def sine_wave(freq, duration):
-=======
 from scipy.signal import butter, lfilter
 from scipy.io import wavfile
 import tkinter as tk
@@ -27,19 +17,6 @@ loaded_wave_fs = None
 is_sequencer_playing = False
 sequencer_thread = None
 
-<<<<<<< HEAD
-def generate_wave(form, freq, duration):
->>>>>>> c7f5cd4 (done attempting to make keyboard)
-    t = np.linspace(0, duration, int(fs * duration), False)
-    if form == 'sine':
-        return np.sin(freq * t * 2 * np.pi)
-    elif form == 'square':
-        return np.sign(np.sin(freq * t * 2 * np.pi))
-    elif form == 'sawtooth':
-        return 2 * (t * freq - np.floor(1/2 + t * freq))
-    elif form == 'triangle':
-        return 2 * np.abs(2 * (t * freq - np.floor(1/2 + t * freq))) - 1
-=======
 sequence_notes = [440, 494, 523, 587, 659, 698, 784]
 sequence_durations = [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4]
 note_interval = 0.5
@@ -118,30 +95,7 @@ def generate_wave(form, freq, duration, lfo_rate, lfo_depth, wave=None):
         elif form == 'triangle':
             wave_triangle = 2 * np.abs(2 * (t * modulated_freq - np.floor(1/2 + t * modulated_freq))) - 1
             return wave_triangle
->>>>>>> 751ebde (added loading wave file, sequencer)
 
-<<<<<<< HEAD
-def square_wave(freq, duration):
-    t = np.linspace(0, duration, int(fs * duration), False)
-    note = np.sign(np.sin(freq * t * 2 * np.pi))
-    return note
-
-def sawtooth_wave(freq, duration):
-    t = np.linspace(0, duration, int(fs * duration), False)
-    note = 2 * (t * freq - np.floor(1/2 + t * freq))
-    return note
-
-def save_wave(filename, data, samplerate):
-    data = np.int16((data / data.max()) * 32767)
-    wavfile.write(filename, samplerate, data)
-
-frequency = 261.63 
-duration = 2.0  
-
-sine_wave = sine_wave(frequency, duration)
-save_wave('sine_wave.wav', sine_wave, fs)
-play(sine_wave, duration)
-=======
 def envelope(adsr, wave):
     attack, decay, sustain, release = adsr
 
@@ -167,25 +121,13 @@ def lowpass(cutoff, fs, order=5):
 
 def low_pass_filter(data, cutoff_freq, fs, order=5):
     b, a = lowpass(cutoff_freq, fs, order=order)
-<<<<<<< HEAD
-    return lfilter(b, a, data)
->>>>>>> c7f5cd4 (done attempting to make keyboard)
-
-square_wave = square_wave(frequency, duration)
-save_wave('square_wave.wav', square_wave, fs)
-=======
     filtered_data = lfilter(b, a, data)
     return filtered_data
 
 def apply_saturation(wave, level):
     saturated_wave = np.tanh(level * wave)
     return saturated_wave
->>>>>>> 751ebde (added loading wave file, sequencer)
 
-<<<<<<< HEAD
-sawtooth_wave = sawtooth_wave(frequency, duration)
-save_wave('sawtooth_wave.wav', sawtooth_wave, fs)
-=======
 def play_sound():
     global loaded_wave, loaded_wave_fs
 
@@ -337,10 +279,6 @@ unload_button.pack()
 play_button = Button(left_frame, text="Play", command=play_sound, bg='#424242', fg='white')
 play_button.pack()
 
-<<<<<<< HEAD
-root.mainloop()
->>>>>>> c7f5cd4 (done attempting to make keyboard)
-=======
 revert_button = Button(left_frame, text="Revert to Defaults", command=revert_to_defaults, bg='#424242', fg='white')
 revert_button.pack()
 
@@ -364,4 +302,3 @@ canvas_widget.pack()
 
 root.protocol("WM_DELETE_WINDOW", on_close)
 root.mainloop()
->>>>>>> 751ebde (added loading wave file, sequencer)

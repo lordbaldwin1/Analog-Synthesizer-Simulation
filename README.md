@@ -1,6 +1,6 @@
 # Analog-Synthesizer-Simulation - Zachary Springer
 
-# Screenshots of Program
+# View of Application
 ![8ed972f8cea2a4fa14e3c5df25b9a064](https://github.com/user-attachments/assets/620adf18-62fc-48cc-a70f-f80f39d15376)
 ![21805f42d8c53c46d516841c0fc94d79](https://github.com/user-attachments/assets/d6e9138a-161b-4e5f-8f45-e50193fd712a)
 
